@@ -208,18 +208,29 @@ async def fetch_upi_apps() -> str:
 @function_tool
 async def translate_text(text: str, target_language: str, context: RunContext) -> str:
     """
-    Simple text translation using a free translation service.
+    Translate text using Google Gemini API.
     
     Args:
         text: Text to translate
-        target_language: Target language code (e.g., 'es' for Spanish, 'fr' for French)
+        target_language: Target language (e.g., 'Spanish', 'French', 'German', 'Hindi')
     """
     try:
-        # Using a simple translation API (you might want to use Google Translate API)
-        # This is a placeholder - you'd need to implement actual translation service
-        return f"Translation feature is not fully implemented yet. Would translate '{text}' to {target_language}."
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "Translation service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = f"Translate the following text to {target_language}. Only return the translation, no explanations:\n\n{text}"
+        
+        response = model.generate_content(prompt)
+        return f"Translation to {target_language}: {response.text}"
         
     except Exception as e:
+        logger.error("Translation error: %s", e)
         return f"Translation error: {str(e)}"
 
 @function_tool
@@ -356,4 +367,198 @@ async def text_analyzer(text: str, context: RunContext) -> str:
         
     except Exception as e:
         return f"Error analyzing text: {str(e)}"
+
+@function_tool
+async def ai_assistant(query: str, context: RunContext) -> str:
+    """
+    Advanced AI assistance using Google Gemini for complex queries and analysis.
+    
+    Args:
+        query: Complex question or task that requires advanced AI reasoning
+    """
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "AI assistant service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # Enhanced prompt for better responses
+        enhanced_prompt = f"""As an advanced AI assistant, please provide a comprehensive and helpful response to the following query. Be accurate, informative, and practical in your answer:
+
+{query}
+
+Please structure your response clearly and provide actionable insights where applicable."""
+        
+        response = model.generate_content(enhanced_prompt)
+        return f"AI Analysis: {response.text}"
+        
+    except Exception as e:
+        logger.error("AI assistant error: %s", e)
+        return f"AI assistant error: {str(e)}"
+
+@function_tool
+async def code_analyzer(code: str, language: str, context: RunContext) -> str:
+    """
+    Analyze code for bugs, improvements, and best practices using Gemini.
+    
+    Args:
+        code: The code to analyze
+        language: Programming language (e.g., 'python', 'javascript', 'java')
+    """
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "Code analysis service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = f"""Analyze this {language} code for:
+1. Potential bugs or errors
+2. Performance improvements
+3. Best practices and code quality
+4. Security considerations
+5. Suggestions for optimization
+
+Code:
+```{language}
+{code}
+```
+
+Provide a structured analysis with specific recommendations."""
+        
+        response = model.generate_content(prompt)
+        return f"Code Analysis Results:\n{response.text}"
+        
+    except Exception as e:
+        logger.error("Code analysis error: %s", e)
+        return f"Code analysis error: {str(e)}"
+
+@function_tool
+async def explain_concept(concept: str, context: RunContext, complexity: str = "intermediate") -> str:
+    """
+    Explain complex concepts using Gemini AI with adjustable complexity.
+    
+    Args:
+        concept: The concept to explain
+        complexity: Explanation level ('beginner', 'intermediate', 'advanced')
+    """
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "Concept explanation service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = f"""Explain the concept of "{concept}" at a {complexity} level.
+
+Guidelines:
+- If beginner: Use simple language, analogies, and avoid jargon
+- If intermediate: Include technical details but keep it accessible
+- If advanced: Provide comprehensive technical depth and nuances
+
+Structure the explanation with:
+1. Simple definition
+2. Key components or principles
+3. Real-world applications or examples
+4. Common misconceptions (if any)
+5. Further learning suggestions
+
+Concept: {concept}"""
+        
+        response = model.generate_content(prompt)
+        return f"Concept Explanation ({complexity} level):\n{response.text}"
+        
+    except Exception as e:
+        logger.error("Concept explanation error: %s", e)
+        return f"Concept explanation error: {str(e)}"
+
+@function_tool
+async def creative_writing(prompt_text: str, writing_type: str, context: RunContext) -> str:
+    """
+    Generate creative content using Gemini AI.
+    
+    Args:
+        prompt_text: The creative prompt or topic
+        writing_type: Type of content ('story', 'poem', 'article', 'email', 'summary')
+    """
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "Creative writing service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        if writing_type.lower() == 'story':
+            system_prompt = "Write an engaging short story with a clear beginning, middle, and end. Include vivid descriptions and character development."
+        elif writing_type.lower() == 'poem':
+            system_prompt = "Write a creative poem with meaningful imagery and rhythm. Consider different poetic forms and styles."
+        elif writing_type.lower() == 'article':
+            system_prompt = "Write an informative article with a clear structure, engaging introduction, and valuable insights."
+        elif writing_type.lower() == 'email':
+            system_prompt = "Write a professional and clear email that effectively communicates the intended message."
+        elif writing_type.lower() == 'summary':
+            system_prompt = "Create a concise and comprehensive summary that captures the key points and main ideas."
+        else:
+            system_prompt = f"Create high-quality {writing_type} content that is engaging and well-structured."
+        
+        full_prompt = f"{system_prompt}\n\nTopic/Prompt: {prompt_text}"
+        
+        response = model.generate_content(full_prompt)
+        return f"Generated {writing_type.title()}:\n\n{response.text}"
+        
+    except Exception as e:
+        logger.error("Creative writing error: %s", e)
+        return f"Creative writing error: {str(e)}"
+
+@function_tool
+async def data_insights(data_description: str, context: RunContext) -> str:
+    """
+    Analyze data patterns and provide insights using Gemini AI.
+    
+    Args:
+        data_description: Description of the data or actual data to analyze
+    """
+    try:
+        import google.generativeai as genai
+        
+        api_key = os.getenv('GOOGLE_API_KEY')
+        if not api_key:
+            return "Data insights service not configured. Please set GOOGLE_API_KEY environment variable."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = f"""Analyze the following data and provide insights:
+
+Data: {data_description}
+
+Please provide:
+1. Key patterns and trends
+2. Notable observations
+3. Potential correlations
+4. Actionable insights
+5. Recommendations for further analysis
+6. Visualization suggestions
+
+Be specific and practical in your analysis."""
+        
+        response = model.generate_content(prompt)
+        return f"Data Insights:\n{response.text}"
+        
+    except Exception as e:
+        logger.error("Data insights error: %s", e)
+        return f"Data insights error: {str(e)}"
     

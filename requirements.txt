@@ -10,3 +10,4 @@ requests
 python-dotenv
 psutil
 asyncio
+google-generativeai

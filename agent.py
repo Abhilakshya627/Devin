@@ -17,7 +17,12 @@ from tools import (
     manage_memory,
     url_shortener,
     qr_code_generator,
-    text_analyzer
+    text_analyzer,
+    ai_assistant,
+    code_analyzer,
+    explain_concept,
+    creative_writing,
+    data_insights
 )
 from livekit.plugins import openai
 
@@ -28,7 +33,7 @@ class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
             instructions=AGENT_INSTRUCTIONS,
-            llm=openai.realtime.RealtimeModel(
+            llm=google.beta.realtime.RealtimeModel(
                 voice="Charon",
                 temperature=0.8,
                 instructions=AGENT_INSTRUCTIONS,
@@ -45,7 +50,12 @@ class Assistant(Agent):
                 manage_memory,
                 url_shortener,
                 qr_code_generator,
-                text_analyzer
+                text_analyzer,
+                ai_assistant,
+                code_analyzer,
+                explain_concept,
+                creative_writing,
+                data_insights
             ],
         )
         
