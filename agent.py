@@ -22,7 +22,44 @@ from tools import (
     code_analyzer,
     explain_concept,
     creative_writing,
-    data_insights
+    data_insights,
+    initialize_devin,
+    devin_command_center,
+    # DEVIN system capabilities
+    grant_permission,
+    revoke_permission,
+    system_status_report,
+    control_applications,
+    file_operations,
+    system_control,
+    intelligent_automation,
+    network_diagnostics,
+    voice_response_mode,
+    # Screen interaction capabilities  
+    take_screenshot,
+    analyze_screen,
+    mouse_control,
+    keyboard_control,
+    find_on_screen,
+    window_management,
+    clipboard_operations,
+    smart_automation_task,
+    # Voice interaction capabilities
+    speak_text,
+    listen_for_command,
+    configure_voice,
+    voice_conversation_mode,
+    audio_system_control,
+    devin_wake_word_detection
+)
+from advanced_tools import (
+    image_analyzer,
+    document_processor,
+    advanced_search,
+    meeting_assistant,
+    learning_assistant,
+    system_monitor,
+    project_manager
 )
 from livekit.plugins import openai
 
@@ -39,6 +76,7 @@ class Assistant(Agent):
                 instructions=AGENT_INSTRUCTIONS,
             ),
             tools=[
+                # Core functionality
                 search_web,
                 get_current_time,
                 calculate_math,
@@ -55,7 +93,49 @@ class Assistant(Agent):
                 code_analyzer,
                 explain_concept,
                 creative_writing,
-                data_insights
+                data_insights,
+                
+                # Advanced tools
+                image_analyzer,
+                document_processor,
+                advanced_search,
+                meeting_assistant,
+                learning_assistant,
+                system_monitor,
+                project_manager,
+                
+                # DEVIN core functions
+                initialize_devin,
+                devin_command_center,
+                
+                # System control capabilities
+                grant_permission,
+                revoke_permission,
+                system_status_report,
+                control_applications,
+                file_operations,
+                system_control,
+                intelligent_automation,
+                network_diagnostics,
+                voice_response_mode,
+                
+                # Screen interaction capabilities
+                take_screenshot,
+                analyze_screen,
+                mouse_control,
+                keyboard_control,
+                find_on_screen,
+                window_management,
+                clipboard_operations,
+                smart_automation_task,
+                
+                # Voice interaction capabilities
+                speak_text,
+                listen_for_command,
+                configure_voice,
+                voice_conversation_mode,
+                audio_system_control,
+                devin_wake_word_detection
             ],
         )
         

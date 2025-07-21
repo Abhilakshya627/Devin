@@ -1,0 +1,60 @@
+{
+  "devin_settings": {
+    "personality": {
+      "response_mode": "classic_devin",
+      "formality_level": "professional",
+      "humor_level": "subtle",
+      "address_user_as": "Sir"
+    },
+    "voice": {
+      "enabled": true,
+      "rate": 180,
+      "volume": 0.8,
+      "voice_id": 0,
+      "wake_word": "devin",
+      "auto_speak_responses": false
+    },
+    "permissions": {
+      "file_operations": false,
+      "app_control": false, 
+      "system_control": false,
+      "network_operations": false,
+      "automation": false,
+      "auto_approve_safe": false
+    },
+    "features": {
+      "screen_interaction": true,
+      "voice_commands": true,
+      "smart_automation": true,
+      "computer_vision": true,
+      "window_management": true,
+      "clipboard_access": true
+    },
+    "security": {
+      "require_permission_for_system_ops": true,
+      "log_all_operations": true,
+      "safe_mode": true,
+      "confirmation_for_destructive_ops": true
+    },
+    "interface": {
+      "show_system_status": true,
+      "verbose_logging": true,
+      "command_suggestions": true,
+      "progress_indicators": true
+    }
+  },
+  "system_status": {
+    "initialized": false,
+    "last_startup": null,
+    "capabilities_checked": false,
+    "permissions_granted": [],
+    "voice_system_ready": false,
+    "screen_system_ready": false
+  },
+  "command_history": [],
+  "user_preferences": {
+    "preferred_automation_style": "step_by_step",
+    "confirmation_level": "medium",
+    "response_detail": "comprehensive"
+  }
+}

@@ -3,14 +3,173 @@ import json
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+from functools import lru_cache
 from livekit.agents import function_tool, RunContext
 import requests
 from langchain_community.tools import DuckDuckGoSearchRun
 import asyncio
+from gemini_client import get_gemini_client, gemini_tool
+
+# Import DEVIN-like capabilities
+from devin_system import (
+    grant_permission, revoke_permission, system_status_report,
+    control_applications, file_operations, system_control,
+    intelligent_automation, network_diagnostics, voice_response_mode
+)
+from screen_interaction import (
+    take_screenshot, analyze_screen, mouse_control, keyboard_control,
+    find_on_screen, window_management, clipboard_operations,
+    smart_automation_task
+)
+from voice_interaction import (
+    speak_text, listen_for_command, configure_voice,
+    voice_conversation_mode, audio_system_control, devin_wake_word_detection
+)
 
 # Enhanced logging setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+@function_tool
+async def initialize_devin(context: RunContext) -> str:
+    """
+    Initialize DEVIN-like capabilities and perform system checks.
+    """
+    try:
+        from devin_system import permission_manager
+        from voice_interaction import voice_manager
+        
+        # System initialization
+        init_report = []
+        init_report.append("🤖 DEVIN INITIALIZATION SEQUENCE")
+        init_report.append("=" * 40)
+        
+        # Check system capabilities
+        init_report.append("System Capabilities Check:")
+        
+        # Voice system
+        try:
+            voice_available = voice_manager.tts_engine is not None
+            init_report.append(f"  Voice Synthesis: {'✅' if voice_available else '❌'}")
+            
+            mic_available = voice_manager.microphone is not None
+            init_report.append(f"  Voice Recognition: {'✅' if mic_available else '❌'}")
+        except:
+            init_report.append("  Voice Systems: ❌ (Install pyttsx3, speechrecognition)")
+        
+        # Screen interaction
+        try:
+            import pyautogui
+            init_report.append("  Screen Control: ✅")
+        except ImportError:
+            init_report.append("  Screen Control: ❌ (Install pyautogui)")
+        
+        # Computer vision
+        try:
+            import cv2
+            init_report.append("  Computer Vision: ✅")
+        except ImportError:
+            init_report.append("  Computer Vision: ❌ (Install opencv-python)")
+        
+        # Window management
+        try:
+            import pygetwindow
+            init_report.append("  Window Management: ✅")
+        except ImportError:
+            init_report.append("  Window Management: ❌ (Install pygetwindow)")
+        
+        # Clipboard operations
+        try:
+            import pyperclip
+            init_report.append("  Clipboard Control: ✅")
+        except ImportError:
+            init_report.append("  Clipboard Control: ❌ (Install pyperclip)")
+        
+        init_report.append("")
+        init_report.append("Permission Status:")
+        for perm, status in permission_manager.permissions.items():
+            init_report.append(f"  {perm.replace('_', ' ').title()}: {'✅' if status else '❌'}")
+        
+        init_report.append("")
+        init_report.append("🎯 DEVIN Systems Status: ONLINE")
+        init_report.append("Ready to assist, Sir. All core systems initialized.")
+        init_report.append("")
+        init_report.append("Available Commands:")
+        init_report.append("• grant_permission - Enable system permissions")
+        init_report.append("• system_status_report - Detailed system analysis")
+        init_report.append("• speak_text - Voice synthesis")
+        init_report.append("• voice_conversation_mode - Interactive voice chat")
+        init_report.append("• take_screenshot - Screen capture")
+        init_report.append("• analyze_screen - AI screen analysis")
+        init_report.append("• control_applications - App management")
+        init_report.append("• intelligent_automation - AI-guided automation")
+        
+        # Try to speak the initialization if voice is available
+        try:
+            voice_manager.speak("Devin systems online. All core functions initialized and ready, Sir.")
+        except:
+            pass
+        
+        return "\n".join(init_report)
+        
+    except Exception as e:
+        logger.error(f"Devin initialization error: {e}")
+        return f"Devin initialization error: {str(e)}"
+
+@function_tool
+@gemini_tool
+async def devin_command_center(command: str, context: RunContext) -> str:
+    """
+    Central command processor for complex DEVIN-like operations.
+    
+    Args:
+        command: Natural language command for DEVIN to execute
+    """
+    try:
+        client = get_gemini_client()
+        
+        # Analyze the command and determine appropriate actions
+        analysis_prompt = f"""As Devin, analyze this command and determine the best approach to execute it:
+
+Command: {command}
+
+Available capabilities:
+- System control (files, applications, processes)
+- Screen interaction (screenshots, mouse, keyboard)
+- Voice interaction (speech synthesis, recognition)
+- Network operations (diagnostics, connectivity)
+- Automation (intelligent task execution)
+- Window management
+- Audio control
+- Clipboard operations
+
+Provide:
+1. Command interpretation
+2. Required tools/functions to execute
+3. Step-by-step execution plan
+4. Any permissions needed
+5. Safety considerations
+
+Respond as Devin would - intelligent, helpful, and slightly witty."""
+        
+        response = await client.generate_content(analysis_prompt)
+        
+        return f"""🤖 DEVIN Command Analysis
+
+{response}
+
+Sir, I've analyzed your request and prepared an execution strategy. 
+Would you like me to proceed with the recommended approach, or shall I wait for your approval on specific steps?"""
+        
+    except Exception as e:
+        logger.error(f"Devin command center error: {e}")
+        return f"Command analysis error: {str(e)}"
+
+# Cache for frequently accessed data
+@lru_cache(maxsize=100)
+def _cached_search(query: str) -> str:
+    """Cache search results to avoid repeated API calls."""
+    pass
 
 @function_tool
 async def search_web(query: str, context: RunContext, max_results: int = 3) -> str:
@@ -206,32 +365,35 @@ async def fetch_upi_apps() -> str:
         return "Error parsing UPI apps data."
 
 @function_tool
+@gemini_tool
 async def translate_text(text: str, target_language: str, context: RunContext) -> str:
     """
-    Translate text using Google Gemini API.
+    Translate text using Google Gemini AI with enhanced accuracy.
     
     Args:
         text: Text to translate
         target_language: Target language (e.g., 'Spanish', 'French', 'German', 'Hindi')
     """
-    try:
-        import google.generativeai as genai
-        
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
-            return "Translation service not configured. Please set GOOGLE_API_KEY environment variable."
-        
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        prompt = f"Translate the following text to {target_language}. Only return the translation, no explanations:\n\n{text}"
-        
-        response = model.generate_content(prompt)
-        return f"Translation to {target_language}: {response.text}"
-        
-    except Exception as e:
-        logger.error("Translation error: %s", e)
-        return f"Translation error: {str(e)}"
+    if not text.strip():
+        return "Error: No text provided for translation."
+    
+    if len(text) > 5000:
+        return "Error: Text too long. Please limit to 5000 characters."
+    
+    client = get_gemini_client()
+    
+    prompt = f"""Translate the following text to {target_language}. 
+Rules:
+- Maintain the original tone and style
+- Preserve formatting (line breaks, punctuation)
+- Keep proper nouns and technical terms appropriate
+- Only return the translation, no explanations
+
+Text to translate:
+{text}"""
+    
+    response = await client.generate_content(prompt)
+    return f"Translation to {target_language}:\n{response}"
 
 @function_tool
 async def generate_password(context: RunContext, length: int = 12, include_symbols: bool = True) -> str:
@@ -369,6 +531,7 @@ async def text_analyzer(text: str, context: RunContext) -> str:
         return f"Error analyzing text: {str(e)}"
 
 @function_tool
+@gemini_tool
 async def ai_assistant(query: str, context: RunContext) -> str:
     """
     Advanced AI assistance using Google Gemini for complex queries and analysis.
@@ -376,29 +539,28 @@ async def ai_assistant(query: str, context: RunContext) -> str:
     Args:
         query: Complex question or task that requires advanced AI reasoning
     """
-    try:
-        import google.generativeai as genai
-        
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
-            return "AI assistant service not configured. Please set GOOGLE_API_KEY environment variable."
-        
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        # Enhanced prompt for better responses
-        enhanced_prompt = f"""As an advanced AI assistant, please provide a comprehensive and helpful response to the following query. Be accurate, informative, and practical in your answer:
+    if not query.strip():
+        return "Error: No query provided."
+    
+    if len(query) > 8000:
+        return "Error: Query too long. Please break it into smaller parts."
+    
+    client = get_gemini_client()
+    
+    # Enhanced prompt for better responses
+    enhanced_prompt = f"""As Devin, an advanced AI assistant, provide a comprehensive and helpful response to this query. 
 
-{query}
+Guidelines:
+- Be accurate, informative, and practical
+- Structure your response clearly with headings if needed
+- Provide actionable insights where applicable
+- Include examples or step-by-step instructions when helpful
+- If the query is complex, break down your answer into logical sections
 
-Please structure your response clearly and provide actionable insights where applicable."""
-        
-        response = model.generate_content(enhanced_prompt)
-        return f"AI Analysis: {response.text}"
-        
-    except Exception as e:
-        logger.error("AI assistant error: %s", e)
-        return f"AI assistant error: {str(e)}"
+Query: {query}"""
+    
+    response = await client.generate_content(enhanced_prompt)
+    return f"AI Analysis:\n{response}"
 
 @function_tool
 async def code_analyzer(code: str, language: str, context: RunContext) -> str:

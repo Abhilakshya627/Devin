@@ -11,3 +11,21 @@ python-dotenv
 psutil
 asyncio
 google-generativeai
+aiohttp
+tenacity
+
+# DEVIN-like computer interaction capabilities
+pyautogui>=0.9.54          # Screen automation and control
+pygetwindow>=0.0.9         # Window management  
+pyperclip>=1.8.2           # Clipboard operations
+opencv-python>=4.8.0       # Computer vision and image processing
+Pillow>=10.0.0             # Image manipulation
+pyttsx3>=2.90              # Text-to-speech synthesis
+SpeechRecognition>=3.10.0  # Speech recognition
+PyAudio>=0.2.11            # Audio input/output (for microphone)
+numpy>=1.24.0              # Numerical operations
+
+# Platform-specific audio dependencies (install separately):
+# Windows: pip install pywin32
+# Linux: sudo apt-get install python3-pyaudio portaudio19-dev  
+# macOS: brew install portaudio
