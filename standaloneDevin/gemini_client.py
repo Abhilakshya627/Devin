@@ -73,7 +73,7 @@ class GeminiClient:
                 logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {wait_time}s...")
                 await asyncio.sleep(wait_time)
     
-    async def generate_content(self, prompt: str, **kwargs) -> str:  
+    async def generate_content(self, prompt: str, **kwargs) -> str:
         """Generate content with error handling and retries."""
         await self._ensure_model()
         await self._rate_limit()

@@ -1,0 +1,38 @@
+# Minimal requirements without LiveKit
+# Core AI and automation capabilities only
+
+# AI and language processing
+google-generativeai
+langchain_community  
+duckduckgo-search
+requests
+python-dotenv
+
+# System automation and control
+pyautogui>=0.9.54          # Screen automation and control
+pygetwindow>=0.0.9         # Window management  
+pyperclip>=1.8.2           # Clipboard operations
+opencv-python>=4.8.0       # Computer vision and image processing
+Pillow>=10.0.0             # Image manipulation
+
+# Voice capabilities (optional)
+pyttsx3>=2.90              # Text-to-speech synthesis
+SpeechRecognition>=3.10.0  # Speech recognition
+PyAudio>=0.2.11            # Audio input/output (for microphone)
+
+# System utilities
+psutil                     # System monitoring
+mem0ai                     # Memory management
+aiohttp                    # HTTP client
+tenacity                   # Retry logic
+numpy>=1.24.0              # Numerical operations
+
+# Web interface (optional - for web_devin.py)
+fastapi                    # Web framework
+uvicorn                    # ASGI server
+websockets                 # WebSocket support
+
+# Platform-specific audio dependencies (install separately):
+# Windows: pip install pywin32
+# Linux: sudo apt-get install python3-pyaudio portaudio19-dev  
+# macOS: brew install portaudio

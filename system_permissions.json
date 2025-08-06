@@ -1,8 +1,8 @@
 {
-  "file_operations": false,
-  "app_control": false,
-  "system_control": false,
-  "network_operations": false,
-  "automation": false,
-  "auto_approve_safe": false
+  "file_operations": true,
+  "app_control": true,
+  "system_control": true,
+  "network_operations": true,
+  "automation": true,
+  "auto_approve_safe": true
 }
