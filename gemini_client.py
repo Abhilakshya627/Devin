@@ -9,6 +9,15 @@ from dataclasses import dataclass
 from functools import wraps
 import time
 
+# Optional offline fallback
+OFFLINE = os.getenv("OFFLINE_LLM", "0").lower() in {"1", "true", "yes"}
+if OFFLINE:
+    try:
+        from dev.local_llm import LocalLLM, load_config
+    except Exception:
+        LocalLLM = None
+        load_config = None
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -33,16 +42,28 @@ class GeminiClient:
         self._last_request_time = 0
         self._request_count = 0
         self._request_times = []
+        self._offline = OFFLINE
+        self._local_llm = None
         
     async def _ensure_model(self):
         """Lazy initialization of Gemini model."""
-        if self._model is None:
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=self.config.api_key)
-                self._model = genai.GenerativeModel(self.config.model)
-            except Exception as e:
-                raise GeminiAPIError(f"Failed to initialize Gemini model: {e}")
+        if self._offline:
+            if self._local_llm is None:
+                if load_config is None:
+                    raise GeminiAPIError("Offline LLM requested but dev.local_llm not available")
+                try:
+                    cfg = load_config("dev/local_config.json")
+                    self._local_llm = LocalLLM(cfg)
+                except Exception as e:
+                    raise GeminiAPIError(f"Failed to initialize offline LLM: {e}")
+        else:
+            if self._model is None:
+                try:
+                    import google.generativeai as genai
+                    genai.configure(api_key=self.config.api_key)
+                    self._model = genai.GenerativeModel(self.config.model)
+                except Exception as e:
+                    raise GeminiAPIError(f"Failed to initialize Gemini model: {e}")
     
     async def _rate_limit(self):
         """Implement rate limiting."""
@@ -80,8 +101,16 @@ class GeminiClient:
         
         async def _generate():
             try:
-                response = self._model.generate_content(prompt, **kwargs)
-                return response.text
+                if self._offline:
+                    messages = [
+                        {"role": "system", "content": "You are Devin, a capable local assistant. Be concise."},
+                        {"role": "user", "content": prompt},
+                    ]
+                    text = self._local_llm.chat(messages, max_tokens=kwargs.get("max_output_tokens", 512))
+                    return text
+                else:
+                    response = self._model.generate_content(prompt, **kwargs)
+                    return response.text
             except Exception as e:
                 logger.error(f"Gemini API error: {e}")
                 raise
@@ -96,11 +125,14 @@ def get_gemini_client() -> GeminiClient:
     global _gemini_client
     
     if _gemini_client is None:
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
-            raise GeminiAPIError("GOOGLE_API_KEY not found in environment variables")
-        
-        config = GeminiConfig(api_key=api_key)
+        if OFFLINE:
+            # No API key required
+            config = GeminiConfig(api_key="offline", model="local")
+        else:
+            api_key = os.getenv('GOOGLE_API_KEY')
+            if not api_key:
+                raise GeminiAPIError("GOOGLE_API_KEY not found in environment variables")
+            config = GeminiConfig(api_key=api_key)
         _gemini_client = GeminiClient(config)
     
     return _gemini_client

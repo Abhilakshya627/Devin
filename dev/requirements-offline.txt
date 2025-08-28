@@ -1,0 +1,7 @@
+# Install offline with local wheels; no network fetch is performed by code.
+# Recommended packages for local LLM + STT
+llama-cpp-python>=0.2.85
+vosk>=0.3.45
+pyttsx3>=2.90
+numpy>=1.24
+gpt4all>=2.8.2

@@ -1,8 +1,0 @@
-{
-  "file_operations": false,
-  "app_control": false,
-  "system_control": false,
-  "network_operations": false,
-  "automation": false,
-  "auto_approve_safe": false
-}

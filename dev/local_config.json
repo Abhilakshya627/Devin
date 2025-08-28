@@ -1,0 +1,15 @@
+{
+  "llm": {
+    "backend": "gpt4all",
+    "model_path": "dev/models/llm",
+    "n_ctx": 8192,
+    "n_threads": 6,
+    "n_gpu_layers": 0,
+    "temperature": 0.2,
+    "top_p": 0.95
+  },
+  "stt": {
+    "engine": "vosk",
+    "model_path": "dev/models/vosk"
+  }
+}

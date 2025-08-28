@@ -12,6 +12,16 @@ from datetime import datetime
 import os
 from livekit.agents import function_tool, RunContext
 from gemini_client import get_gemini_client, gemini_tool
+import os
+OFFLINE = os.getenv("OFFLINE_LLM", "0").lower() in {"1", "true", "yes"}
+VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", "dev/models/vosk")
+_offline_stt = None
+if OFFLINE:
+    try:
+        from dev.offline_stt import OfflineSTT
+        _offline_stt = OfflineSTT(VOSK_MODEL_PATH)
+    except Exception:
+        _offline_stt = None
 
 logger = logging.getLogger(__name__)
 
@@ -90,9 +100,35 @@ class VoiceManager:
                 # Listen for audio
                 audio = self.recognizer.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
             
-            # Recognize speech using Google's service
-            text = self.recognizer.recognize_google(audio)
-            return text
+            # Prefer offline STT if configured
+            if _offline_stt is not None:
+                try:
+                    import tempfile, wave
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tf:
+                        wav_path = tf.name
+                    # Save audio to WAV for Vosk
+                    data = audio.get_wav_data()
+                    with wave.open(wav_path, 'wb') as wf:
+                        wf.setnchannels(1)
+                        wf.setsampwidth(2)
+                        wf.setframerate(16000)
+                        wf.writeframes(data)
+                    text = _offline_stt.recognize_wav_file(wav_path) or ""
+                    try:
+                        os.remove(wav_path)
+                    except Exception:
+                        pass
+                    return text
+                except Exception as e:
+                    logger.error(f"Offline STT failed, falling back to online: {e}")
+            
+            # Fallback: Google's service (may require internet)
+            try:
+                text = self.recognizer.recognize_google(audio)
+                return text
+            except Exception as e:
+                logger.error(f"Speech recognition error: {e}")
+                return None
             
         except sr.WaitTimeoutError:
             return "timeout"

@@ -136,7 +136,7 @@ class Assistant(Agent):
                 voice_conversation_mode,
                 audio_system_control,
                 devin_wake_word_detection
-            ],
+            ], 
         )
         
 
